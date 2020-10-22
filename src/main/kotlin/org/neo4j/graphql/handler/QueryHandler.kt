@@ -7,6 +7,7 @@ import org.neo4j.cypherdsl.core.PassThrough
 import org.neo4j.cypherdsl.core.renderer.Renderer
 import org.neo4j.graphql.*
 import org.neo4j.graphql.handler.filter.OptimizedFilterHandler
+import java.util.*
 
 class QueryHandler private constructor(
         type: GraphQLFieldsContainer,
@@ -98,9 +99,19 @@ class QueryHandler private constructor(
             "($variable:${label()})"
         }
         val where = where(variable, fieldDefinition, type, propertyArguments(field), field)
+        val returnBuilder = StringJoiner(",")
+        field.selectionSet.selections.forEach {selection ->
+            returnBuilder.add("$variable.${(selection as Field).name} AS $variable$ordering${skipLimit.query}")
+        }
+//        return Cypher(
+//                """MATCH $select${where.query}
+//                  RETURN ${mapProjection.query} AS $variable$ordering${skipLimit.query}""".trimMargin(),
+//                (where.params + mapProjection.params + skipLimit.params))
         return Cypher(
                 """MATCH $select${where.query}
-                  |RETURN ${mapProjection.query} AS $variable$ordering${skipLimit.query}""".trimMargin(),
+                  RETURN ${returnBuilder.toString()}$ordering${skipLimit.query}""".trimMargin(),
                 (where.params + mapProjection.params + skipLimit.params))
+
+        //"$variable:${(field.selectionSet.selections.first() as Field).name}".toString()
     }
 }

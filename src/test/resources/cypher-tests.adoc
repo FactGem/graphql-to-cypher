@@ -294,7 +294,7 @@ This is a migration of the tests located at https://github.com/neo4j-graphql/neo
 .Cypher
 [source,cypher]
 ----
-MATCH (`movie`:`Movie`:`u_user-id`:`newMovieLabel` {title:$title}) RETURN `movie` { .title } AS `movie`
+MATCH (`movie`:`Movie`:`u_user-id`:`newMovieLabel` {title:$title}) RETURN `movie.title'' AS `movie`
 ----
 
 === Simple skip limit
